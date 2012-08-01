@@ -26,8 +26,14 @@ function kdtree() {
 	// @param target Point that we want to find nearest neighbor to.
 	// @return Point in this._points that is closest to target.
 	this.findNearestNeighbor = function(target) {
-		var start = 0, end = this._points.length;
-		this._nn(target, best, start, end);
+		if (this._points.length === null) {
+			return null;
+		}
+
+		var start = 0, end = this._points.length, d = 0,
+			median = Math.floor( (start+end)/2 ),
+			best = this._points[median];
+		return this._nn(target, best, start, end, d);
 	}
 
 	// Builds the tree recursively by sorting each subarray and partitioning it into two again.
@@ -69,16 +75,67 @@ function kdtree() {
 	// Nearest Neighbor algorithm on kdtrees.
 	// Recurse down dimensions to find the best hyperrectangle.
 	// Recurse backup to find the closest points within the radius of the best hyperrectangle.
+	//
 	// @param target Point that we want to find nearest neighbor to.
-	// @param best Point that represents the closest point in the kdtree so far to target.
+	// @param currentBest Point that represents the closest point to target so far.
 	// @param start Number representing the start index of the subarray.
 	// @param end Number representing the end index of the subarray.
+	// @param d Number representing the dimension that we are on.
 	// @return Point in this._points that is closest to target.
-	this._nn = function(target, best, start, end) {
+	this._nn = function(target, currentBest, start, end, d) {
+		var median = Math.floor( (start+end)/2 ),
+			root = this._points[median],
+			radius,
+			rightChildIndex, leftChildIndex,
+			childDistance;
+
+		// leaf node
+		if (end-start === 0) {
+			if (this._shouldReplace(target, currentBest, root)) {
+				return root;
+			}  
+			return currentBest;
+		} else {
+			if (this._smallerDimVal(target, root, d)) {
+				// search the left subtree
+				currentBest = this._nn(target, currentBest, start, median-1, (d+1)%this._k);
+				if (!this._shouldReplace(target, currentBest, root)) {
+					return currentBest;
+				}
+				currentBest = root;
+
+				radius = this._distance(target, currentBest); 
+				rightChildIndex = Math.floor( (median+1+end)/2 );
+				childDistance = this._distance(target, this._points[rightChildIndex]);
+
+				if (childDistance < radius) {
+					currentBest = this._nn(target, currentBest, median+1, end, (d+1)%this._k);
+				}
+				return currentBest;
+			} else {
+				// search the right subtree
+				currentBest = this._nn(target, currentBest, median+1, end, (d+1)%this._k);
+				if (!this._shouldReplace(target, currentBest, root)) {
+					return currentBest;
+				}
+				currentBest = root;
+
+				radius = this._distance(target, currentBest);
+				leftChildIndex = Math.floor( (start+median-1)/2 );
+				childDistance = this._distance(target, this._points[leftChildIndex]);
+
+				if (childDistance < radius) {
+					currentBest = this._nn(target, currentBest, start, median-1, (d+1)%this._k);
+				}
+				return currentBest;
+			}
+		}
+
 
 	}
 
 	// Returns true if the value of point a in dimension d is smaller than the value of point b in dimension d.
+	//
 	// @param a Point that we want to compare.
 	// @param b Point that we want to compare.
 	// @param d Number represensting the dimension of the value.
