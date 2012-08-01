@@ -4,8 +4,8 @@
 			that = $(this),
 			params, data;
 
-		if (!that.is("img")) {
-			throw "Wrong tag for mozaic, please use it on an image";
+		if (!that.is("canvas")) {
+			throw "Wrong tag for mozaic, please use it on a canvas";
 		} 
 		
 		if (typeof args[0] !== "undefined") {
@@ -13,8 +13,7 @@
 		} else {
 			params = {
 				width: that.width(),
-				height: that.height(),
-				prune: false
+				height: that.height()
 			};
 		}
 		
