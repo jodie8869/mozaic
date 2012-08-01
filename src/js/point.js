@@ -7,6 +7,9 @@ function point() {
 	this._init = function() {
 		if (typeof param === "number") {
 			this._k = param;
+			for(var i = 0; i < this._k; i += 1) {
+				this._vals.push(0);
+			}
 		} else {
 			this._k = param.length;
 			this._vals = param;
@@ -27,8 +30,8 @@ function point() {
 		this._vals[index] = val;
 	}
 
-	this.print = function() {
-		console.log(this._vals.toString(), this._k);
+	this.getK = function() {
+		return this._k;
 	}
 
 	this.equals = function(p) {
@@ -43,5 +46,9 @@ function point() {
 		}
 
 		return less;
+	}
+
+	this.print = function() {
+		console.log(this._vals.toString(), this._k);
 	}
 }
