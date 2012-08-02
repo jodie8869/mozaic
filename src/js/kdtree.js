@@ -210,7 +210,7 @@ function kdtree() {
 			dim = queue[index].dimension;
 			median = Math.floor( (start+end)/2 );
 
-			level += "(point: "+ point.print() + ", d: " + dim + ") "; 
+			level += "(point: "+ point.toString() + ", d: " + dim + ") "; 
 
 			if (end-start > 0) {
 				leftChildIndex = Math.floor( (start + median-1)/2 );
