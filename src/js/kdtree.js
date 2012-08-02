@@ -31,7 +31,8 @@ function kdtree() {
 
 		var start = 0, end = this._points.length, d = 0,
 			median = Math.floor( (start+end)/2 ),
-			best = this._points[median];
+			medianIndex = this._pointIndex[median],
+			best = this._points[medianIndex];
 		return this._nn(target, best, start, end, d);
 	}
 
