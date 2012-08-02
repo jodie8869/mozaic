@@ -6,7 +6,7 @@
 		<img id="istanbul" src="images/istanbul.jpeg"></img>
 	</body>
 	<script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
-	<script src="../mozaic.max.js"></script>
+	<script src="../mozaic.min.js"></script>
 	<script language="javascript" type="text/javascript">
 		console.log( $("#istanbul") );
 		//$("#istanbul").mozaic();
@@ -30,6 +30,6 @@
 		p.init();
 
 		var nearest = tree.findNearestNeighbor(p);
-		console.log(nearest);
+		console.log(nearest.toString(), p.toString());
 	</script>
 </html>

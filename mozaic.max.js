@@ -51,7 +51,7 @@ function point() {
 		var less = true;
 
 		for(var i = 0; i < this._k; i += 1) {
-			less &= (vals[i] < p.at(i));
+			less &= (this._vals[i] < p.at(i));
 		}
 
 		return less;
@@ -96,7 +96,8 @@ function kdtree() {
 
 		var start = 0, end = this._points.length, d = 0,
 			median = Math.floor( (start+end)/2 ),
-			best = this._points[median];
+			medianIndex = this._pointIndex[median],
+			best = this._points[medianIndex];
 		return this._nn(target, best, start, end, d);
 	}
 
@@ -152,11 +153,12 @@ function kdtree() {
 			medianIndex = this._pointIndex[median],
 			root = this._points[medianIndex],
 			radius,
-			rightChildIndex, leftChildIndex,
+			rc, lc,
+			rcIndex, lcIndex,
 			childDistance;
 
 		// leaf node
-		if (end-start === 0) {
+		if (end-start <= 0) {
 			if (this._shouldReplace(target, currentBest, root)) {
 				return root;
 			}  
@@ -171,11 +173,14 @@ function kdtree() {
 				currentBest = root;
 
 				radius = this._distance(target, currentBest); 
-				rightChildIndex = this._pointIndex[ Math.floor( (median+1+end)/2 ) ];
-				childDistance = this._distance(target, this._points[rightChildIndex]);
+				rc = Math.floor( (median+1+end)/2 )
+				if (this._isInBounds(rc)) {
+					rcIndex = this._pointIndex[rc];
+					childDistance = this._distance(target, this._points[rcIndex]);
 
-				if (childDistance < radius) {
-					currentBest = this._nn(target, currentBest, median+1, end, (d+1)%this._k);
+					if (childDistance < radius) {
+						currentBest = this._nn(target, currentBest, median+1, end, (d+1)%this._k);
+					}
 				}
 				return currentBest;
 			} else {
@@ -187,12 +192,16 @@ function kdtree() {
 				currentBest = root;
 
 				radius = this._distance(target, currentBest);
-				leftChildIndex = this._pointIndex[ Math.floor( (start+median-1)/2 ) ];
-				childDistance = this._distance(target, this._points[leftChildIndex]);
+				lc = Math.floor( (start+median-1)/2 );
+				if (this._isInBounds(lc)) {
+					lcIndex = this._pointIndex[lc];
+					childDistance = this._distance(target, this._points[lcIndex]);
 
-				if (childDistance < radius) {
-					currentBest = this._nn(target, currentBest, start, median-1, (d+1)%this._k);
+					if (childDistance < radius) {
+						currentBest = this._nn(target, currentBest, start, median-1, (d+1)%this._k);
+					}					
 				}
+
 				return currentBest;
 			}
 		}
@@ -234,6 +243,10 @@ function kdtree() {
 		}
 
 		return dist;
+	}
+
+	this._isInBounds = function(index) {
+		return ((index >= 0) && (index <= this._points.length));
 	}
 
 	// Returns a string that represents the tree in a level-by-level fashion.

@@ -51,7 +51,7 @@ function point() {
 		var less = true;
 
 		for(var i = 0; i < this._k; i += 1) {
-			less &= (vals[i] < p.at(i));
+			less &= (this._vals[i] < p.at(i));
 		}
 
 		return less;
