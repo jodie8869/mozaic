@@ -1,3 +1,4 @@
+// @author Efe Karakus
 function kdtree() {
 	this._points = Array.prototype.slice.call(arguments, 0)[0];
 	this._k = Array.prototype.slice.call(arguments,1)[0];
@@ -92,6 +93,10 @@ function kdtree() {
 			rcIndex, lcIndex,
 			childDistance;
 
+		if (typeof root === "undefined") {
+			return currentBest;
+		}
+
 		// leaf node
 		if (end-start <= 0) {
 			if (this._shouldReplace(target, currentBest, root)) {
@@ -108,11 +113,10 @@ function kdtree() {
 				currentBest = root;
 
 				radius = this._distance(target, currentBest); 
-				rc = Math.floor( (median+1+end)/2 )
+				rc = Math.floor( (median+1+end)/2 );
 				if (this._isInBounds(rc)) {
 					rcIndex = this._pointIndex[rc];
 					childDistance = this._distance(target, this._points[rcIndex]);
-
 					if (childDistance < radius) {
 						currentBest = this._nn(target, currentBest, median+1, end, (d+1)%this._k);
 					}
@@ -180,8 +184,11 @@ function kdtree() {
 		return dist;
 	}
 
+	// Returns true if the given index is within the size of this._points.
+	// @param index Number that we want to find if its in bounds.
+	// @return true if index is in bounds, false otherwise.
 	this._isInBounds = function(index) {
-		return ((index >= 0) && (index <= this._points.length));
+		return ((index >= 0) && (index < this._points.length));
 	}
 
 	// Returns a string that represents the tree in a level-by-level fashion.

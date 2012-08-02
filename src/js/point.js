@@ -1,3 +1,4 @@
+// @author Efe Karakus
 function point() {
 	var param = Array.prototype.slice.call(arguments, 0)[0];
 	this._vals = [];
