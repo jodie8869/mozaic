@@ -3,13 +3,12 @@ function kdtree() {
 	this._k = Array.prototype.slice.call(arguments,1)[0];
 	this._pointIndex = [];
 
-	this._init();
 
 	// Builds a kdtree with the given points, mainly assigns the correct indices to the array pointIndex
 	// such that the median of each subarray represents the root of a subtree.
-	this._init = function() {
+	this.init = function() {
 		var l = this._points.length;
-		for(var i = 0; i < l; i += 0) {
+		for(var i = 0; i < l; i += 1) {
 			this._pointIndex.push(i);
 		}
 		this._buildTree(0, l, 0);
@@ -26,7 +25,7 @@ function kdtree() {
 	// @param target Point that we want to find nearest neighbor to.
 	// @return Point in this._points that is closest to target.
 	this.findNearestNeighbor = function(target) {
-		if (this._points.length === null) {
+		if (this._points.length === 0) {
 			return null;
 		}
 
@@ -60,11 +59,12 @@ function kdtree() {
 	// @param end Number representing the end index for pointIndex.
 	// @param d Number representing the dimension on which we want to sort at.
 	this._sort = function(start, end, d) {
-		var subArray = this._pointIndex.slice(start, end);
-		var l = subArray.length;
+		var subArray = this._pointIndex.slice(start, end),
+			l = subArray.length,
+			that = this;
 
 		subArray.sort(function(i1, i2) { 
-			return this._smallerDimVal(this._points[i1], this._points[i2], d);
+			return that._smallerDimVal(that._points[i1], that._points[i2], d);
 		});
 
 		for (var i = 0; i < l; i += 1) {
@@ -84,7 +84,8 @@ function kdtree() {
 	// @return Point in this._points that is closest to target.
 	this._nn = function(target, currentBest, start, end, d) {
 		var median = Math.floor( (start+end)/2 ),
-			root = this._points[median],
+			medianIndex = this._pointIndex[median],
+			root = this._points[medianIndex],
 			radius,
 			rightChildIndex, leftChildIndex,
 			childDistance;
@@ -105,7 +106,7 @@ function kdtree() {
 				currentBest = root;
 
 				radius = this._distance(target, currentBest); 
-				rightChildIndex = Math.floor( (median+1+end)/2 );
+				rightChildIndex = this._pointIndex[ Math.floor( (median+1+end)/2 ) ];
 				childDistance = this._distance(target, this._points[rightChildIndex]);
 
 				if (childDistance < radius) {
@@ -121,7 +122,7 @@ function kdtree() {
 				currentBest = root;
 
 				radius = this._distance(target, currentBest);
-				leftChildIndex = Math.floor( (start+median-1)/2 );
+				leftChildIndex = this._pointIndex[ Math.floor( (start+median-1)/2 ) ];
 				childDistance = this._distance(target, this._points[leftChildIndex]);
 
 				if (childDistance < radius) {
@@ -173,68 +174,20 @@ function kdtree() {
 	// Returns a string that represents the tree in a level-by-level fashion.
 	// @return String representing the kdtree.
 	this.toString = function() {
-		var queue = [],
-			start = 0, end = this._pointIndex.length, d = 0,
-			median = Math.floor( (start+end)/2 ),
-			root;
+		var str = "",
+			l = this._pointIndex.length, 
+			start = 0, end = l,
+			index, node;
 
-		if ( median === 0 ) {
-			console.log("The tree is empty (>^.^)>");
-			return;
+		if (end-start <= 0) {
+			return "The tree is empty (>^.^)>";
 		}
 
-		root = this._points[median];
-		queue.push({
-			point: root,
-			start: start,
-			end: end,
-			dimension: d
-		});
-
-		return this._toStringBFS(queue);
-	}
-
-	// Traverses the kdtree in BFS fashion printing the root nodes at each level on the same line.
-	// @param queue Array of points that are on the same level.
-	// @return String representing the whole kd-tree after a BFS traversal.
-	this._toStringBFS = function(queue) {
-		var level = "", 
-			index = 0
-			point, dim, start, end, median,
-			nextQueue = [], leftChildIndex, rightChildIndex;
-
-		while (queue.length > 0) {
-			point = queue[index].point;
-			start = queue[index].start;
-			end = queue[index].end;
-			dim = queue[index].dimension;
-			median = Math.floor( (start+end)/2 );
-
-			level += "(point: "+ point.toString() + ", d: " + dim + ") "; 
-
-			if (end-start > 0) {
-				leftChildIndex = Math.floor( (start + median-1)/2 );
-				rightChildIndex = Math.floor( (median+1 + end)/2 );
-
-				nextQueue.push({
-					point: this._points[leftChildIndex],
-					start: start,
-					end: median-1,
-					dimension: (d+1) % this._k
-				});
-
-				nextQueue.push({
-					point: this._points[rightChildIndex],
-					start: median+1,
-					end: end,
-					dimension: (d+1) % this._k
-				});
-			}
-			
-			queue.shift();
-			index += 1;
+		for(var i=0; i < l; i += 1) {
+			index = this._pointIndex[i];
+			node = this._points[index];
+			str += node.toString() + " ";
 		}
-		level += "\n";
-		return level + this._toStringBFS(nextQueue);
+		return str;
 	}
 }

@@ -2,11 +2,10 @@ function point() {
 	var param = Array.prototype.slice.call(arguments, 0)[0];
 	this._vals = [];
 	this._k = 0;
-	this._init();
 
 	// Builds a point with either all values set to 0 if only the dimension is specified
 	// else sets its values to be the array of values passed into the function.
-	this._init = function() {
+	this.init = function() {
 		if (typeof param === "number") {
 			this._k = param;
 			for(var i = 0; i < this._k; i += 1) {

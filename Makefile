@@ -3,10 +3,10 @@ jsdir = ${srcdir}js/
 cssdir = ${srcdir}css/
 
 jsmodules = \
-	${jsdir}mozaic.js \
 	${jsdir}point.js \
-	${jsdir}kdtree.js
-
+	${jsdir}kdtree.js \
+	${jsdir}mozaic.js
+	
 all: mozaic.min.js mozaic.max.js
 
 mozaic.min.js: ${jsmodules}
