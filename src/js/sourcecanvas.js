@@ -14,7 +14,6 @@ function SourceCanvas() {
 		this.src = canvas.src;
 		imageData = context.getImageData(0,0, this.width, this.height).data;
 		l = imageData.length;
-		console.log(l);
 
 		for (var i = 0; i < l; i += 4) {
 			var r = imageData[i];

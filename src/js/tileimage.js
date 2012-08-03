@@ -2,15 +2,20 @@
 function TileImage() {
 	this._data = [];
 	this._avgPoint = null;
+	this._width = 0;
+	this._height = 0;
 
 	// Builds a tile image based on a single data given from the JSON object.
 	// @param data Array of RGB values constituting a tile.
-	this.init = function(data) {
+	this.init = function(data, width, height) {
 		var l, 
 			sumR = 0, sumG = 0, sumB = 0,
 			avgR = 0, avgG = 0, avgB = 0;
 
 		this._data = data;
+		this._width = width;
+		this._height = height;
+
 		l = this._data.length;
 		for (var i = 0; i < l; i += 1) {
 			sumR += this._data[i][0];
@@ -36,5 +41,11 @@ function TileImage() {
 	// @return Point with values the average of RGB of the whole tile.
 	this.getAvgPoint = function() {
 		return this._avgPoint;
+	}
+
+	// Returns a String representing the average point of the tile.
+	// @return String representing the average point of the tile.
+	this.toString = function() {
+		return this._avgPoint.toString();
 	}
 }

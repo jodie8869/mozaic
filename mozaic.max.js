@@ -293,7 +293,6 @@ function SourceCanvas() {
 		this.src = canvas.src;
 		imageData = context.getImageData(0,0, this.width, this.height).data;
 		l = imageData.length;
-		console.log(l);
 
 		for (var i = 0; i < l; i += 4) {
 			var r = imageData[i];
@@ -339,15 +338,20 @@ function SourceCanvas() {
 function TileImage() {
 	this._data = [];
 	this._avgPoint = null;
+	this._width = 0;
+	this._height = 0;
 
 	// Builds a tile image based on a single data given from the JSON object.
 	// @param data Array of RGB values constituting a tile.
-	this.init = function(data) {
+	this.init = function(data, width, height) {
 		var l, 
 			sumR = 0, sumG = 0, sumB = 0,
 			avgR = 0, avgG = 0, avgB = 0;
 
 		this._data = data;
+		this._width = width;
+		this._height = height;
+
 		l = this._data.length;
 		for (var i = 0; i < l; i += 1) {
 			sumR += this._data[i][0];
@@ -374,6 +378,47 @@ function TileImage() {
 	this.getAvgPoint = function() {
 		return this._avgPoint;
 	}
+
+	// Returns a String representing the average point of the tile.
+	// @return String representing the average point of the tile.
+	this.toString = function() {
+		return this._avgPoint.toString();
+	}
+}function Tiles() {
+	this._tiles = [];
+
+	// Builds a TileImage array of all the tiles given to us from the data file.
+	// @param data Array of RGB Arrays composing a tile.
+	// @param width Number representing the width of a tile.
+	// @param height Number representing the height of a tile.
+	this.init = function(data, width, height) {
+		var l = data.length;
+
+		for (var i = 0; i < l; i += 1) {
+			var tileImage = new TileImage();
+			tileImage.init(data[i], width, height);
+			this._tiles.push(tileImage);
+		}
+	}
+
+	// Returns the array of tile images.
+	// @return Array of tile images.
+	this.getTiles = function() {
+		return this._tiles;
+	}
+
+	// Returns a String that represents all the tiles available.
+	// @return String that represents all the tiles available.
+	this.toString = function() {
+		var l = this._tiles.length;
+		var str = "";
+
+		for(var i = 0; i < l; i += 1) {
+			str += this._tiles[i].toString() + " ";
+		}
+
+		return str;
+	}
 }// @version 1.0.0
 // @author Efe Karakus
 (function($) {
@@ -382,18 +427,31 @@ function TileImage() {
 			that = this,
 			param, data,
 			canvas = that[0],
-			sourceCanvas;
+			sourceCanvas,
+			tiles;
 
 		if (!that.is("canvas")) {
 			throw "Wrong tag for mozaic, please use it on a canvas (-I.I-)";
 		} 
-		
+
 		if (typeof args[0] !== "undefined") {
 			param = args[0];
 			if (typeof param.data === "string") {
-				$.getJSON(param.data, function(json){
-				 	data = json;
-					console.log(json);
+				$.ajax({
+					url: param.data,
+					type: 'GET',
+					dataType: "json",
+					async: false,
+					success: function(json) {
+				 		data = json;
+					},
+					error: function(e ,msg) {
+						if(msg === "error") {
+							throw "Error occured while reading the data file " + param.data;
+						} else {
+							data = $.parseJSON(e.responseText.toString());
+						}
+					}
 				});
 			} else {
 				data = param.data
@@ -404,5 +462,11 @@ function TileImage() {
 
 		sourceCanvas = new SourceCanvas();
 		sourceCanvas.init(canvas);
+
+		tiles = new Tiles();
+		tiles.init(data.data, data.width, data.height);
+
+		console.log(tiles.toString());
+
 	};
 })(jQuery);

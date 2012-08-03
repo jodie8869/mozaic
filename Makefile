@@ -7,6 +7,7 @@ jsmodules = \
 	${jsdir}kdtree.js\
 	${jsdir}sourcecanvas.js\
 	${jsdir}tileimage.js\
+	${jsdir}tiles.js\
 	${jsdir}mozaic.js
 	
 all: mozaic.max.js mozaic.min.js
