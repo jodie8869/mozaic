@@ -1,5 +1,5 @@
 // @author Efe Karakus
-function point() {
+function Point() {
 	var param = Array.prototype.slice.call(arguments, 0)[0];
 	this._vals = [];
 	this._k = 0;

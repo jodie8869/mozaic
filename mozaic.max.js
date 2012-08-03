@@ -1,5 +1,5 @@
 // @author Efe Karakus
-function point() {
+function Point() {
 	var param = Array.prototype.slice.call(arguments, 0)[0];
 	this._vals = [];
 	this._k = 0;
@@ -65,7 +65,7 @@ function point() {
 	}
 }
 // @author Efe Karakus
-function kdtree() {
+function KDTree() {
 	this._points = Array.prototype.slice.call(arguments, 0)[0];
 	this._k = Array.prototype.slice.call(arguments,1)[0];
 	this._pointIndex = [];
@@ -278,12 +278,111 @@ function kdtree() {
 	}
 }
 // @author Efe Karakus
+function SourceCanvas() {
+	this.width = 0;
+	this.height = 0;
+	this.src = 0;
+	this.data = [];
+
+	// Builds a Source Canvas object, where data contains Points at x,y coordinate.
+	// @param canvas Canvas element from the DOM on which .mozaid() was called.
+	this.init = function(canvas) {
+		var context = canvas.getContext('2d'), imageData, l;
+		this.width = canvas.width;
+		this.height = canvas.height;
+		this.src = canvas.src;
+		imageData = context.getImageData(0,0, this.width, this.height).data;
+		l = imageData.length;
+		console.log(l);
+
+		for (var i = 0; i < l; i += 4) {
+			var r = imageData[i];
+			var g = imageData[i + 1];
+			var b = imageData[i + 2];
+
+			var p = new Point([r,g,b]);
+			p.init();
+			this.data.push(p);
+		}
+	}
+
+	// Returns the point at coordinate x,y.
+	// @param x Number representing the x coordinate of the point.
+	// @param y Number representing the y coordinate of the point.
+	// @return Point at coordinate x,y.
+	this.getPoint = function(x,y) {
+		if ((x < 0 || x >= this.width) || (y < 0 || y >= this.height)) {
+			throw "x,y coordinates out of bounds <(*.*)>";
+		} 
+		var index = (this.width * y) + x;
+		return this.data[index];
+	}
+
+	// Returns a string representing the points in the source canvas.
+	// @return String that describes the points in the source canvas.
+	this.toString = function() {
+		var str = "";
+		if (this.width === 0 || this.height === 0) {
+			return "Image has no width or height (>^.^<)";
+		}
+
+		for (var x = 0; x < this.width; x += 1) {
+			for (var y = 0; y < this.height; y += 1) {
+				str += this.getPoint(x,y).toString() + " ";
+			}
+			str += "\n";
+		}
+
+		return str;
+	}
+}// @author Efe Karakus
+function TileImage() {
+	this._data = [];
+	this._avgPoint = null;
+
+	// Builds a tile image based on a single data given from the JSON object.
+	// @param data Array of RGB values constituting a tile.
+	this.init = function(data) {
+		var l, 
+			sumR = 0, sumG = 0, sumB = 0,
+			avgR = 0, avgG = 0, avgB = 0;
+
+		this._data = data;
+		l = this._data.length;
+		for (var i = 0; i < l; i += 1) {
+			sumR += this._data[i][0];
+			sumG += this._data[i][1];
+			sumB += this._data[i][2];
+		}
+
+		avgR = Math.floor(sumR/l);
+		avgG = Math.floor(sumG/l);
+		avgB = Math.floor(sumB/l);
+
+		this._avgPoint = new Point([avgR, avgG, avgB]);
+		this._avgPoint.init();
+	}	
+
+	// Returns an array of RGB values representing the tile.
+	// @return Array of RGB values representing the tile.
+	this.getData = function() {
+		return this._data;
+	}
+
+	// Returns a Point with values the average of RGB of the whole tile.
+	// @return Point with values the average of RGB of the whole tile.
+	this.getAvgPoint = function() {
+		return this._avgPoint;
+	}
+}// @version 1.0.0
+// @author Efe Karakus
 (function($) {
 	$.fn.mozaic = function () {
 		var args = Array.prototype.slice.call(arguments, 0),
 			that = this,
+			param, data,
 			canvas = that[0],
-			param, data;
+			sourceCanvas;
 
 		if (!that.is("canvas")) {
 			throw "Wrong tag for mozaic, please use it on a canvas (-I.I-)";
@@ -303,7 +402,7 @@ function kdtree() {
 			throw "Please provide a data set <(*.*<)";
 		}
 
-		console.log(canvas);
-		console.log(canvas.width, canvas.height);
+		sourceCanvas = new SourceCanvas();
+		sourceCanvas.init(canvas);
 	};
 })(jQuery);

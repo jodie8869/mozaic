@@ -1,5 +1,5 @@
 // @author Efe Karakus
-function kdtree() {
+function KDTree() {
 	this._points = Array.prototype.slice.call(arguments, 0)[0];
 	this._k = Array.prototype.slice.call(arguments,1)[0];
 	this._pointIndex = [];

@@ -8,24 +8,18 @@
 	<script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
 	<script src="../mozaic.max.js"></script>
 	<script language="javascript" type="text/javascript">
-		var data = {
-			width: 50,
-			height: 50,
-			data: []
-		};
-
 		var img = new Image(),
 			ctx = $("#istanbul")[0].getContext('2d'),
 			width = $("#istanbul").attr('width'), height= $("#istanbul").attr('height');
 
+
 		img.onload = function() {
 			ctx.drawImage(img, 0, 0);
+			$("#istanbul").mozaic({
+				data: 'tiles/kittens.js'
+			});
 		}
 		img.src = "./images/istanbul.jpeg";
-
-		$("#istanbul").mozaic({
-			data: data
-		});
-
+		
 	</script>
 </html>

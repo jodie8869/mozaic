@@ -1,10 +1,12 @@
+// @version 1.0.0
 // @author Efe Karakus
 (function($) {
 	$.fn.mozaic = function () {
 		var args = Array.prototype.slice.call(arguments, 0),
 			that = this,
 			param, data,
-			numOfTiles;
+			canvas = that[0],
+			sourceCanvas;
 
 		if (!that.is("canvas")) {
 			throw "Wrong tag for mozaic, please use it on a canvas (-I.I-)";
@@ -24,7 +26,7 @@
 			throw "Please provide a data set <(*.*<)";
 		}
 
-		console.log(canvas);
-		console.log(canvas.width, canvas.height);
+		sourceCanvas = new SourceCanvas();
+		sourceCanvas.init(canvas);
 	};
 })(jQuery);
