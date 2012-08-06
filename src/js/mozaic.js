@@ -7,7 +7,11 @@
 			param, data,
 			canvas = that[0],
 			sourceCanvas,
+			sourcePoints,
 			tiles,
+			tilesPoints,
+			kdTree,
+			numRows, numCols,
 			mozaicCanvas;
 
 		if (!that.is("canvas")) {
@@ -39,18 +43,65 @@
 		} else {
 			throw "Please provide a data set <(*.*<)";
 		}
-
+		
+		/*
+		// build the source canvas
 		sourceCanvas = new SourceCanvas();
-		sourceCanvas.init(canvas);
+		sourceCanvas.init(canvas, data.width, data.height);
+		sourcePoints = sourceCanvas.getAvgPoints();
 
+		// build the tile images
 		tiles = new Tiles();
 		tiles.init(data.data, data.width, data.height);
+		tilesPoints = tiles.getAvgPoints();
 
-		/*
+		// set up the kd tree
+		kdTree = new KDTree(tilesPoints, 3);
+		kdTree.init();
+
+		numRows = sourceCanvas.getNumRows();
+		numCols = sourceCanvas.getNumCols();
+
+		// set up the canvas
 		mozaicCanvas = new MozaicCanvas();
-		mozaicCanvas.init(1,1);
-		mozaicCanvas.setTile(0, 0, tiles.getTiles()[0]);
+		mozaicCanvas.init(numRows, numCols);
+
+		// find the closest tiles to the source image
+		for (var i = 0; i < sourcePoints.length; i += 1) {
+			var closestPoint = kdTree.findNearestNeighbor(sourcePoints[i]),
+				tile = tiles.getTile(closestPoint),
+				col = (i%numCols), row = Math.floor(i/numCols);
+
+			mozaicCanvas.setTile(row, col, tile);
+		}
+		
 		mozaicCanvas.draw(canvas);
 		*/
+		
+		sourceCanvas = new SourceCanvas();
+		sourceCanvas.init(canvas, data.width, data.height);
+		sourcePoints = sourceCanvas.getAvgPoints();
+
+		numRows = sourceCanvas.getNumRows();
+		numCols = sourceCanvas.getNumCols();
+
+		mozaicCanvas = new MozaicCanvas();
+		mozaicCanvas.init(numRows, numCols);
+
+		for (var i = 0; i < sourcePoints.length; i += 1) {
+			var tile = new TileImage(),
+				col = (i%numCols), row = Math.floor(i/numCols),
+				imageData = [];
+
+			for (var j = 0; j < data.width*data.height; j += 1) {
+				imageData.push(sourcePoints[i]._vals);
+			}
+			tile.init(imageData, data.width, data.height);
+			mozaicCanvas.setTile(row, col, tile);
+		}
+		
+		mozaicCanvas.draw(canvas);
+		
+		
 	};
 })(jQuery);

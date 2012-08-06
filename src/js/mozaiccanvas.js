@@ -12,9 +12,9 @@ function MozaicCanvas() {
 		this._cols = cols;
 
 		for(var row = 0; row < this._rows; row += 1) {
-			this._tiles[row] = [];
+			this._tiles.push([]);
 			for(var col = 0; col < this._cols; col += 1) {
-				this._tiles[row][col] = null;
+				this._tiles[row].push(null);
 			}
 		} 
 	}
@@ -25,7 +25,7 @@ function MozaicCanvas() {
 	// @return TileImage at coordinate row,col.
 	this.getTile = function(row, col) {
 		if ((row < 0 || row >= this._rows) || (col<0 || col >= this._cols)) {
-			throw "getTile out of range <(&.&)>";
+			return null;
 		}
 		return this._tiles[row][col];
 	}
@@ -44,10 +44,11 @@ function MozaicCanvas() {
 	// Draws the tiles into the canvas.
 	// @param canvas Canvas Element that we want to draw the image to.
 	this.draw = function(canvas) {
+
 		var context = canvas.getContext('2d'), 
 			width = canvas.width,
 			height = canvas.height,
-			imageData = [];
+			imageData = null;
 		context.clearRect(0,0, width, height);
 		imageData = context.createImageData(width, height);
 
@@ -66,7 +67,6 @@ function MozaicCanvas() {
 					if (x >= width || y >= height) {
 						continue;
 					}
-
 					this._setPixel(imageData, x, y, rgb);
 				}
 			}

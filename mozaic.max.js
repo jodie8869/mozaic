@@ -283,10 +283,20 @@ function SourceCanvas() {
 	this.height = 0;
 	this.src = 0;
 	this.data = [];
+	this._tileWidth = 0;
+	this._tileHeight = 0;
+	this._numRows = 0;
+	this._numCols = 0;
 
 	// Builds a Source Canvas object, where data contains Points at x,y coordinate.
 	// @param canvas Canvas element from the DOM on which .mozaid() was called.
-	this.init = function(canvas) {
+	// @param tileWidth Number representing the width of a tile.
+	// @param tileHeight Number representing the height of a tile.
+	this.init = function(canvas, tileWidth, tileHeight) {
+		if (tileWidth === 0 || tileHeight === 0) {
+			throw "The width or height of a tile can not be 0 (>#.#<)";
+		}
+
 		var context = canvas.getContext('2d'), imageData, l;
 		this.width = canvas.width;
 		this.height = canvas.height;
@@ -294,15 +304,35 @@ function SourceCanvas() {
 		imageData = context.getImageData(0,0, this.width, this.height).data;
 		l = imageData.length;
 
-		for (var i = 0; i < l; i += 4) {
-			var r = imageData[i];
-			var g = imageData[i + 1];
-			var b = imageData[i + 2];
+		for(var y = 0; y < this.height; y += 1) {
+			for(var x = 0; x < this.width; x += 1) {
+				var r = imageData[((this.width*y)+x)*4];
+				var g = imageData[((this.width*y)+x)*4 + 1];
+				var b = imageData[((this.width*y)+x)*4 + 2];
 
-			var p = new Point([r,g,b]);
-			p.init();
-			this.data.push(p);
+				var p = new Point([r,g,b]);
+				p.init();
+				this.data.push(p);				
+			}
 		}
+
+
+		this._tileWidth = tileWidth;
+		this._tileHeight = tileHeight;
+		this._numCols = Math.floor(this.width/tileWidth);
+		this._numRows = Math.floor(this.height/tileHeight);
+	}
+
+	// Returns the number of rows necessary for creating a source image of tiles.
+	// @return Number representing the number of rows necessary for creating a source image of tiles.
+	this.getNumRows = function() {
+		return this._numRows;
+	}
+
+	// Returns the number of columns necessary for creating a source image of tiles.
+	// @return Number representing the number of columns necessary for creating a source image of tiles.
+	this.getNumCols = function() {
+		return this._numCols;
 	}
 
 	// Returns the point at coordinate x,y.
@@ -311,10 +341,66 @@ function SourceCanvas() {
 	// @return Point at coordinate x,y.
 	this.getPoint = function(x,y) {
 		if ((x < 0 || x >= this.width) || (y < 0 || y >= this.height)) {
-			throw "x,y coordinates out of bounds <(*.*)>";
+			return null;
 		} 
 		var index = (this.width * y) + x;
 		return this.data[index];
+	}
+
+	// Returns all the average point of each tile.
+	// @return Array of average points of each tile.
+	this.getAvgPoints = function() {
+		var avgPoints = [];
+
+		for(var row = 0; row < this._numRows; row += 1) {
+			for(var col = 0; col < this._numCols; col += 1) {
+				var points = this._getTilePoints(row,col),
+					l = points.length,
+					sumR = 0, sumG = 0, sumB = 0,
+					point, avgPoint;
+					avgR = 0, avgG = 0, avgB = 0;
+
+				for(var i = 0; i < l; i += 1) {
+					point = points[i];
+					sumR += point.at(0);
+					sumG += point.at(1);
+					sumB += point.at(2);
+				}
+
+				// LAST TEN ARE NAN
+
+				avgR = Math.floor(sumR/l);
+				avgG = Math.floor(sumG/l);
+				avgB = Math.floor(sumB/l);
+
+				avgPoint = new Point([avgR, avgG, avgB]);
+				avgPoint.init();
+
+				avgPoints.push(avgPoint);
+			}
+		}
+		return avgPoints;
+	}
+
+	// Returns an array of Points that are under the tile at row,col.
+	// @param row Number representing the row of the tile.
+	// @param col Number representing the col of the tile.
+	this._getTilePoints = function(row, col) {
+		var points = [];
+		for(var yi = 0; yi < this._tileHeight; yi += 1) {
+			for(var xi = 0; xi < this._tileWidth; xi += 1) {
+				var x = (this._tileWidth)*col + xi,
+					y = (this._tileHeight)*row + yi,
+					point;
+				point = this.getPoint(x,y);
+
+				if (point === null) {
+					continue;
+				}
+				points.push(point);
+			}
+		}
+		return points;
 	}
 
 	// Returns a string representing the points in the source canvas.
@@ -334,7 +420,8 @@ function SourceCanvas() {
 
 		return str;
 	}
-}// @author Efe Karakus
+}
+// @author Efe Karakus
 function TileImage() {
 	this._data = [];
 	this._avgPoint = null;
@@ -379,13 +466,30 @@ function TileImage() {
 		return this._avgPoint;
 	}
 
+	// Returns the width of the tile image.
+	// @return Number representing the width of the tile image.
+	this.getWidth = function() {
+		return this._width;
+	}
+
+	// Returns the height of the tile image.
+	// @return Number representing the height of the tile image.
+	this.getHeight = function() {
+		return this._height;
+	}
+
 	// Returns a String representing the average point of the tile.
 	// @return String representing the average point of the tile.
 	this.toString = function() {
 		return this._avgPoint.toString();
 	}
-}function Tiles() {
+}
+// @author Efe Karakus
+function Tiles() {
 	this._tiles = [];
+	this._width = 0;
+	this._height = 0;
+	this._avgToIndex = {};
 
 	// Builds a TileImage array of all the tiles given to us from the data file.
 	// @param data Array of RGB Arrays composing a tile.
@@ -394,10 +498,17 @@ function TileImage() {
 	this.init = function(data, width, height) {
 		var l = data.length;
 
+		this._width = width;
+		this._height = height;
 		for (var i = 0; i < l; i += 1) {
-			var tileImage = new TileImage();
+			var tileImage = new TileImage(),
+				avgPoint = null;
+			
 			tileImage.init(data[i], width, height);
 			this._tiles.push(tileImage);
+			
+			avgPoint = tileImage.getAvgPoint();
+			this._avgToIndex[avgPoint] = i;
 		}
 	}
 
@@ -405,6 +516,29 @@ function TileImage() {
 	// @return Array of tile images.
 	this.getTiles = function() {
 		return this._tiles;
+	}
+
+	// Returns the tile image with its average point being avgPoint.
+	// @param avgPoint Point representing the average RGB values of a tile.
+	// @return TileImage with its average point being avgPoint.
+	this.getTile = function(avgPoint) {
+		var index;
+		if (!(avgPoint in this._avgToIndex)) {
+			return null;
+		} 
+		index = this._avgToIndex[avgPoint];
+		return this._tiles[index];
+	}
+
+	// Returns all the average points of the tiles.
+	// @return Array of Points representing the RGB values of each tile.
+	this.getAvgPoints = function() {
+		var points = [];
+		for (var i = 0; i < this._tiles.length; i += 1) {
+			var point = this._tiles[i].getAvgPoint();
+			points.push(point);
+		}
+		return points;
 	}
 
 	// Returns a String that represents all the tiles available.
@@ -419,7 +553,98 @@ function TileImage() {
 
 		return str;
 	}
-}// @version 1.0.0
+}
+// @author Efe Karakus
+function MozaicCanvas() {
+	this._rows = 0;
+	this._cols = 0;
+	this._tiles = [];
+
+	// Builds a 2D array of empty TileImages.
+	// @param rows Number of image rows in the Mozaic.
+	// @param cols Number of image columns in the Mozaic.
+	this.init = function(rows, cols) {
+		this._rows = rows;
+		this._cols = cols;
+
+		for(var row = 0; row < this._rows; row += 1) {
+			this._tiles.push([]);
+			for(var col = 0; col < this._cols; col += 1) {
+				this._tiles[row].push(null);
+			}
+		} 
+	}
+
+	// Returns the tile located at row and col.
+	// @param row Number representing the row of the tile image.
+	// @param col Number representing the colum of the tile image.
+	// @return TileImage at coordinate row,col.
+	this.getTile = function(row, col) {
+		if ((row < 0 || row >= this._rows) || (col<0 || col >= this._cols)) {
+			return null;
+		}
+		return this._tiles[row][col];
+	}
+
+	// Inserts a TileImage at location row,col.
+	// @param row Number representing the row of the tile image.
+	// @param col Number representing the column of the tile image.
+	// @param tile TileImage that we want to insert into the mozaic.
+	this.setTile = function(row, col, tile) {
+		if ((row < 0 || row >= this._rows) || (col<0 || col >= this._cols)) {
+			throw "getTile out of range <(&.&)>";
+		}
+		this._tiles[row][col] = tile;		
+	}
+
+	// Draws the tiles into the canvas.
+	// @param canvas Canvas Element that we want to draw the image to.
+	this.draw = function(canvas) {
+
+		var context = canvas.getContext('2d'), 
+			width = canvas.width,
+			height = canvas.height,
+			imageData = null;
+		context.clearRect(0,0, width, height);
+		imageData = context.createImageData(width, height);
+
+		for(var row = 0; row < this._rows; row += 1) {
+			for(var col = 0; col < this._cols; col += 1) {
+				var tile = this.getTile(row,col),
+					tileData = tile.getData(),
+					tileWidth = tile.getWidth(),
+					tileHeight = tile.getHeight();
+
+				for (var i = 0; i < tileData.length; i += 1) {
+					var x = (col*tileWidth) + (i % tileWidth),
+						y = (row*tileHeight) + Math.floor(i/tileWidth),
+						rgb = tileData[i];
+
+					if (x >= width || y >= height) {
+						continue;
+					}
+					this._setPixel(imageData, x, y, rgb);
+				}
+			}
+		}
+
+		context.putImageData(imageData, 0, 0);
+	}
+
+	// Places the rgb values into the x,y coordinates in imageData.
+	// @param imageData Array of rgba values.
+	// @param x Number representing the x coordinate of the rgb value.
+	// @param y Number representing the y coordinate of the rgb value.
+	// @param rgb Array of red, green, blue values.
+	this._setPixel = function(imageData, x, y, rgb) {
+		var index = ((y*imageData.width) + x) * 4;
+		imageData.data[index + 0] = rgb[0];
+		imageData.data[index + 1] = rgb[1];
+		imageData.data[index + 2] = rgb[2];
+		imageData.data[index + 3] = 255;	// no opacity
+	}
+}
+// @version 1.0.0
 // @author Efe Karakus
 (function($) {
 	$.fn.mozaic = function () {
@@ -428,7 +653,12 @@ function TileImage() {
 			param, data,
 			canvas = that[0],
 			sourceCanvas,
-			tiles;
+			sourcePoints,
+			tiles,
+			tilesPoints,
+			kdTree,
+			numRows, numCols,
+			mozaicCanvas;
 
 		if (!that.is("canvas")) {
 			throw "Wrong tag for mozaic, please use it on a canvas (-I.I-)";
@@ -459,14 +689,65 @@ function TileImage() {
 		} else {
 			throw "Please provide a data set <(*.*<)";
 		}
-
+		
+		/*
+		// build the source canvas
 		sourceCanvas = new SourceCanvas();
-		sourceCanvas.init(canvas);
+		sourceCanvas.init(canvas, data.width, data.height);
+		sourcePoints = sourceCanvas.getAvgPoints();
 
+		// build the tile images
 		tiles = new Tiles();
 		tiles.init(data.data, data.width, data.height);
+		tilesPoints = tiles.getAvgPoints();
 
-		console.log(tiles.toString());
+		// set up the kd tree
+		kdTree = new KDTree(tilesPoints, 3);
+		kdTree.init();
 
+		numRows = sourceCanvas.getNumRows();
+		numCols = sourceCanvas.getNumCols();
+
+		// set up the canvas
+		mozaicCanvas = new MozaicCanvas();
+		mozaicCanvas.init(numRows, numCols);
+
+		// find the closest tiles to the source image
+		for (var i = 0; i < sourcePoints.length; i += 1) {
+			var closestPoint = kdTree.findNearestNeighbor(sourcePoints[i]),
+				tile = tiles.getTile(closestPoint),
+				col = (i%numCols), row = Math.floor(i/numCols);
+
+			mozaicCanvas.setTile(row, col, tile);
+		}
+		
+		mozaicCanvas.draw(canvas);
+		*/
+		
+		sourceCanvas = new SourceCanvas();
+		sourceCanvas.init(canvas, data.width, data.height);
+		sourcePoints = sourceCanvas.getAvgPoints();
+
+		numRows = sourceCanvas.getNumRows();
+		numCols = sourceCanvas.getNumCols();
+
+		mozaicCanvas = new MozaicCanvas();
+		mozaicCanvas.init(numRows, numCols);
+
+		for (var i = 0; i < sourcePoints.length; i += 1) {
+			var tile = new TileImage(),
+				col = (i%numCols), row = Math.floor(i/numCols),
+				imageData = [];
+
+			for (var j = 0; j < data.width*data.height; j += 1) {
+				imageData.push(sourcePoints[i]._vals);
+			}
+			tile.init(imageData, data.width, data.height);
+			mozaicCanvas.setTile(row, col, tile);
+		}
+		
+		mozaicCanvas.draw(canvas);
+		
+		
 	};
 })(jQuery);
