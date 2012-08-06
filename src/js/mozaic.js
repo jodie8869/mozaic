@@ -44,7 +44,7 @@
 			throw "Please provide a data set <(*.*<)";
 		}
 		
-		/*
+		
 		// build the source canvas
 		sourceCanvas = new SourceCanvas();
 		sourceCanvas.init(canvas, data.width, data.height);
@@ -76,32 +76,5 @@
 		}
 		
 		mozaicCanvas.draw(canvas);
-		*/
-		
-		sourceCanvas = new SourceCanvas();
-		sourceCanvas.init(canvas, data.width, data.height);
-		sourcePoints = sourceCanvas.getAvgPoints();
-
-		numRows = sourceCanvas.getNumRows();
-		numCols = sourceCanvas.getNumCols();
-
-		mozaicCanvas = new MozaicCanvas();
-		mozaicCanvas.init(numRows, numCols);
-
-		for (var i = 0; i < sourcePoints.length; i += 1) {
-			var tile = new TileImage(),
-				col = (i%numCols), row = Math.floor(i/numCols),
-				imageData = [];
-
-			for (var j = 0; j < data.width*data.height; j += 1) {
-				imageData.push(sourcePoints[i]._vals);
-			}
-			tile.init(imageData, data.width, data.height);
-			mozaicCanvas.setTile(row, col, tile);
-		}
-		
-		mozaicCanvas.draw(canvas);
-		
-		
 	};
 })(jQuery);

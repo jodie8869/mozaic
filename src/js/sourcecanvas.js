@@ -88,8 +88,6 @@ function SourceCanvas() {
 					sumB += point.at(2);
 				}
 
-				// LAST TEN ARE NAN
-
 				avgR = Math.floor(sumR/l);
 				avgG = Math.floor(sumG/l);
 				avgB = Math.floor(sumB/l);

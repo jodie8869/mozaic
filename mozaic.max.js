@@ -154,10 +154,7 @@ function KDTree() {
 		var median = Math.floor( (start+end)/2 ),
 			medianIndex = this._pointIndex[median],
 			root = this._points[medianIndex],
-			radius,
-			rc, lc,
-			rcIndex, lcIndex,
-			childDistance;
+			radius, dDistance;
 
 		if (typeof root === "undefined") {
 			return currentBest;
@@ -179,13 +176,10 @@ function KDTree() {
 				currentBest = root;
 
 				radius = this._distance(target, currentBest); 
-				rc = Math.floor( (median+1+end)/2 );
-				if (this._isInBounds(rc)) {
-					rcIndex = this._pointIndex[rc];
-					childDistance = this._distance(target, this._points[rcIndex]);
-					if (childDistance < radius) {
-						currentBest = this._nn(target, currentBest, median+1, end, (d+1)%this._k);
-					}
+				dDistance = (target.at(d)-currentBest.at(d))*(target.at(d)-currentBest.at(d));
+
+				if (dDistance < radius) {
+					currentBest = this._nn(target, currentBest, median+1, end, (d+1)%this._k);
 				}
 				return currentBest;
 			} else {
@@ -197,16 +191,11 @@ function KDTree() {
 				currentBest = root;
 
 				radius = this._distance(target, currentBest);
-				lc = Math.floor( (start+median-1)/2 );
-				if (this._isInBounds(lc)) {
-					lcIndex = this._pointIndex[lc];
-					childDistance = this._distance(target, this._points[lcIndex]);
+				dDistance = (target.at(d)-currentBest.at(d))*(target.at(d)-currentBest.at(d));
 
-					if (childDistance < radius) {
-						currentBest = this._nn(target, currentBest, start, median-1, (d+1)%this._k);
-					}					
+				if (dDistance < radius) {
+					currentBest = this._nn(target, currentBest, start, median-1, (d+1)%this._k);
 				}
-
 				return currentBest;
 			}
 		}
@@ -366,8 +355,6 @@ function SourceCanvas() {
 					sumG += point.at(1);
 					sumB += point.at(2);
 				}
-
-				// LAST TEN ARE NAN
 
 				avgR = Math.floor(sumR/l);
 				avgG = Math.floor(sumG/l);
@@ -690,7 +677,7 @@ function MozaicCanvas() {
 			throw "Please provide a data set <(*.*<)";
 		}
 		
-		/*
+		
 		// build the source canvas
 		sourceCanvas = new SourceCanvas();
 		sourceCanvas.init(canvas, data.width, data.height);
@@ -722,32 +709,5 @@ function MozaicCanvas() {
 		}
 		
 		mozaicCanvas.draw(canvas);
-		*/
-		
-		sourceCanvas = new SourceCanvas();
-		sourceCanvas.init(canvas, data.width, data.height);
-		sourcePoints = sourceCanvas.getAvgPoints();
-
-		numRows = sourceCanvas.getNumRows();
-		numCols = sourceCanvas.getNumCols();
-
-		mozaicCanvas = new MozaicCanvas();
-		mozaicCanvas.init(numRows, numCols);
-
-		for (var i = 0; i < sourcePoints.length; i += 1) {
-			var tile = new TileImage(),
-				col = (i%numCols), row = Math.floor(i/numCols),
-				imageData = [];
-
-			for (var j = 0; j < data.width*data.height; j += 1) {
-				imageData.push(sourcePoints[i]._vals);
-			}
-			tile.init(imageData, data.width, data.height);
-			mozaicCanvas.setTile(row, col, tile);
-		}
-		
-		mozaicCanvas.draw(canvas);
-		
-		
 	};
 })(jQuery);
