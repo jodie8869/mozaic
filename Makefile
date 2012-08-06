@@ -8,6 +8,7 @@ jsmodules = \
 	${jsdir}sourcecanvas.js\
 	${jsdir}tileimage.js\
 	${jsdir}tiles.js\
+	${jsdir}mozaiccanvas.js\
 	${jsdir}mozaic.js
 	
 all: mozaic.max.js mozaic.min.js

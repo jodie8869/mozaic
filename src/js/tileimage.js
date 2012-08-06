@@ -43,6 +43,18 @@ function TileImage() {
 		return this._avgPoint;
 	}
 
+	// Returns the width of the tile image.
+	// @return Number representing the width of the tile image.
+	this.getWidth = function() {
+		return this._width;
+	}
+
+	// Returns the height of the tile image.
+	// @return Number representing the height of the tile image.
+	this.getHeight = function() {
+		return this._height;
+	}
+
 	// Returns a String representing the average point of the tile.
 	// @return String representing the average point of the tile.
 	this.toString = function() {

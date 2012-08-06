@@ -7,7 +7,8 @@
 			param, data,
 			canvas = that[0],
 			sourceCanvas,
-			tiles;
+			tiles,
+			mozaicCanvas;
 
 		if (!that.is("canvas")) {
 			throw "Wrong tag for mozaic, please use it on a canvas (-I.I-)";
@@ -45,7 +46,11 @@
 		tiles = new Tiles();
 		tiles.init(data.data, data.width, data.height);
 
-		console.log(tiles.toString());
-
+		/*
+		mozaicCanvas = new MozaicCanvas();
+		mozaicCanvas.init(1,1);
+		mozaicCanvas.setTile(0, 0, tiles.getTiles()[0]);
+		mozaicCanvas.draw(canvas);
+		*/
 	};
 })(jQuery);
