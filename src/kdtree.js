@@ -12,7 +12,7 @@ function KDTree() {
 		for(var i = 0; i < l; i += 1) {
 			this._pointIndex.push(i);
 		}
-		this._buildTree(0, l, 0);
+		this._buildTree(0, l-1, 0);
 	}
 
 	// Searches the kdtree in two steps:
@@ -30,7 +30,7 @@ function KDTree() {
 			return null;
 		}
 
-		var start = 0, end = this._points.length, d = 0,
+		var start = 0, end = this._points.length - 1, d = 0,
 			median = Math.floor( (start+end)/2 ),
 			medianIndex = this._pointIndex[median],
 			best = this._points[medianIndex];
@@ -61,7 +61,8 @@ function KDTree() {
 	// @param end Number representing the end index for pointIndex.
 	// @param d Number representing the dimension on which we want to sort at.
 	this._sort = function(start, end, d) {
-		var subArray = this._pointIndex.slice(start, end),
+
+		var subArray = this._pointIndex.slice(start, end+1),
 			l = subArray.length,
 			that = this;
 
@@ -90,12 +91,12 @@ function KDTree() {
 			root = this._points[medianIndex],
 			radius, dDistance;
 
-		if (typeof root === "undefined") {
+		if (start > end) {
 			return currentBest;
 		}
 
 		// leaf node
-		if (end-start <= 0) {
+		if (end-start === 0) {
 			if (this._shouldReplace(target, currentBest, root)) {
 				return root;
 			}  
@@ -104,34 +105,31 @@ function KDTree() {
 			if (this._smallerDimVal(target, root, d)) {
 				// search the left subtree
 				currentBest = this._nn(target, currentBest, start, median-1, (d+1)%this._k);
-				if (!this._shouldReplace(target, currentBest, root)) {
-					return currentBest;
+				if (this._shouldReplace(target, currentBest, root)) {
+					currentBest = root;
 				}
-				currentBest = root;
 
 				radius = this._distance(target, currentBest); 
-				dDistance = (target.at(d)-currentBest.at(d))*(target.at(d)-currentBest.at(d));
+				dDistance = (target.at(d)-root.at(d))*(target.at(d)-root.at(d));
 
-				if (dDistance < radius) {
+				if (dDistance <= radius) {
 					currentBest = this._nn(target, currentBest, median+1, end, (d+1)%this._k);
 				}
-				return currentBest;
 			} else {
 				// search the right subtree
 				currentBest = this._nn(target, currentBest, median+1, end, (d+1)%this._k);
-				if (!this._shouldReplace(target, currentBest, root)) {
-					return currentBest;
+				if (this._shouldReplace(target, currentBest, root)) {
+					currentBest = root;
 				}
-				currentBest = root;
-
+				
 				radius = this._distance(target, currentBest);
-				dDistance = (target.at(d)-currentBest.at(d))*(target.at(d)-currentBest.at(d));
+				dDistance = (target.at(d)-root.at(d))*(target.at(d)-root.at(d));
 
-				if (dDistance < radius) {
+				if (dDistance <= radius) {
 					currentBest = this._nn(target, currentBest, start, median-1, (d+1)%this._k);
 				}
-				return currentBest;
 			}
+			return currentBest;
 		}
 
 
@@ -144,7 +142,7 @@ function KDTree() {
 	// @param d Number represensting the dimension of the value.
 	// @return true if point a has a smaller value than b in dimension d.
 	this._smallerDimVal = function(a, b, d) {
-		return (a.at(d) < b.at(d));
+		return (a.at(d) === b.at(d)) ? a.lessThan(b) : (a.at(d) < b.at(d));
 	}
 
 	// Returns true if the potential point is closer to the target point.
@@ -156,7 +154,11 @@ function KDTree() {
 		var tcDist = this._distance(target,currentBest);
 		var tpDist = this._distance(target,potential);
 
-		return (tcDist === tpDist) ? potential.lessThan(currentBest) : (tpDist < tcDist);
+		if (tcDist === tpDist) {
+			return potential.lessThan(currentBest);
+		} else{
+			return (tpDist < tcDist);
+		} 
 	}
 
 	// Computes the Euclidian distance between points a and b.
@@ -171,13 +173,6 @@ function KDTree() {
 		}
 
 		return dist;
-	}
-
-	// Returns true if the given index is within the size of this._points.
-	// @param index Number that we want to find if its in bounds.
-	// @return true if index is in bounds, false otherwise.
-	this._isInBounds = function(index) {
-		return ((index >= 0) && (index < this._points.length));
 	}
 
 	// Returns a string that represents the tree in a level-by-level fashion.
