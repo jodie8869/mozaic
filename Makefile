@@ -1,15 +1,13 @@
 srcdir = src/
-jsdir = ${srcdir}js/
-cssdir = ${srcdir}css/
 
 jsmodules = \
-	${jsdir}point.js\
-	${jsdir}kdtree.js\
-	${jsdir}sourcecanvas.js\
-	${jsdir}tileimage.js\
-	${jsdir}tiles.js\
-	${jsdir}mozaiccanvas.js\
-	${jsdir}mozaic.js
+	${srcdir}point.js\
+	${srcdir}kdtree.js\
+	${srcdir}sourcecanvas.js\
+	${srcdir}tileimage.js\
+	${srcdir}tiles.js\
+	${srcdir}mozaiccanvas.js\
+	${srcdir}mozaic.js
 	
 all: mozaic.max.js mozaic.min.js
 
