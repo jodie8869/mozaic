@@ -127,10 +127,11 @@ function KDTree() {
 	// @param end Number representing the end index for pointIndex.
 	// @param d Number representing the dimension on which we want to sort at.
 	this._sort = function(start, end, d) {
+
 		var subArray = this._pointIndex.slice(start, end+1),
 			l = subArray.length,
 			that = this;
-			
+
 		subArray.sort(function(i1, i2) { 
 			return that._smallerDimVal(that._points[i1], that._points[i2], d);
 		});
@@ -693,7 +694,7 @@ function MozaicCanvas() {
 		mozaicCanvas = new MozaicCanvas();
 		mozaicCanvas.init(numRows, numCols);
 
-		
+		/*
 		// find the closest tiles to the source image
 		for (var i = 0; i < sourcePoints.length; i += 1) {
 			var closestPoint = kdTree.findNearestNeighbor(sourcePoints[i]),
@@ -702,8 +703,8 @@ function MozaicCanvas() {
 
 			mozaicCanvas.setTile(row, col, tile);
 		}
+		*/
 		
-		/*
 		for (var i = 0; i < sourcePoints.length; i += 1) {
 			var minDistance = 999999999999999999;
 			var minNode = null;
@@ -718,7 +719,7 @@ function MozaicCanvas() {
 				mozaicCanvas.setTile(row, col, tile);
 			}
 		}
-		*/
+		
 		mozaicCanvas.draw(canvas);
 	};
 })(jQuery);
