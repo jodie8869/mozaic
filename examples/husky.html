@@ -1,26 +1,26 @@
 <html>
 	<head>
-		<title>Cat on Grass Example</title>
+		<title>Husky Example</title>
 	</head>
 	<body>
-		<img src="./images/catongrass.jpg"></img>
-		<canvas id="cat" width="1696px" height="1132px"></canvas>
+		<img src="./images/husky.jpeg"></img>
+		<canvas id="husky" width="1024px" height="768px"></canvas>
 	</body>
 	<script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
 	<script src="../mozaic.max.js"></script>
 	<script language="javascript" type="text/javascript">
 		var img = new Image(),
-			ctx = $("#cat")[0].getContext('2d'),
-			width = $("#cat").attr('width'), height= $("#cat").attr('height');
+			ctx = $("#husky")[0].getContext('2d'),
+			width = $("#husky").attr('width'), height= $("#husky").attr('height');
 
 
 		img.onload = function() {
 			ctx.drawImage(img, 0, 0);
-			$("#cat").mozaic({
+			$("#husky").mozaic({
 				data: './tiles/all-tiles.json'
 			});
 		}
-		img.src = "./images/catongrass.jpg";
+		img.src = "./images/husky.jpeg";
 		
 	</script>
 </html>

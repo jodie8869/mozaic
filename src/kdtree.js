@@ -67,7 +67,11 @@ function KDTree() {
 			that = this;
 
 		subArray.sort(function(i1, i2) { 
-			return that._smallerDimVal(that._points[i1], that._points[i2], d);
+			if (that._smallerDimVal(that._points[i1], that._points[i2], d) ) {
+				return -1;
+			} else {
+				return 1;
+			}
 		});
 
 		for (var i = 0; i < l; i += 1) {
@@ -142,7 +146,11 @@ function KDTree() {
 	// @param d Number represensting the dimension of the value.
 	// @return true if point a has a smaller value than b in dimension d.
 	this._smallerDimVal = function(a, b, d) {
-		return (a.at(d) === b.at(d)) ? a.lessThan(b) : (a.at(d) < b.at(d));
+		if (a.at(d) === b.at(d)) {
+			return a.lessThan(b);
+		} else {
+			return (a.at(d) < b.at(d));
+		} 
 	}
 
 	// Returns true if the potential point is closer to the target point.
@@ -156,7 +164,7 @@ function KDTree() {
 
 		if (tcDist === tpDist) {
 			return potential.lessThan(currentBest);
-		} else{
+		} else {
 			return (tpDist < tcDist);
 		} 
 	}
