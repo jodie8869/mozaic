@@ -702,7 +702,7 @@ function MozaicCanvas() {
 		mozaicCanvas = new MozaicCanvas();
 		mozaicCanvas.init(numRows, numCols);
 
-		/*
+		
 		// find the closest tiles to the source image
 		for (var i = 0; i < sourcePoints.length; i += 1) {
 			var closestPoint = kdTree.findNearestNeighbor(sourcePoints[i]),
@@ -710,22 +710,6 @@ function MozaicCanvas() {
 				col = (i%numCols), row = Math.floor(i/numCols);
 
 			mozaicCanvas.setTile(row, col, tile);
-		}
-		*/
-		
-		for (var i = 0; i < sourcePoints.length; i += 1) {
-			var minDistance = 999999999999999999;
-			var minNode = null;
-			for (var j = 0; j < tilesPoints.length; j += 1) {
-				var dist = kdTree._distance(sourcePoints[i], tilesPoints[j]);
-				if (dist < minDistance) {
-					minDistance = dist;
-					minNode = tilesPoints[j];
-				}
-				var tile = tiles.getTile(minNode);
-				var col = (i%numCols), row = Math.floor(i/numCols);
-				mozaicCanvas.setTile(row, col, tile);
-			}
 		}
 		
 		mozaicCanvas.draw(canvas);
