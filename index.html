@@ -118,60 +118,60 @@
 	<script src="http://code.highcharts.com/highcharts.js"></script>
 	<script src="http://code.highcharts.com/modules/exporting.js"></script>
 	<script type="text/javascript">
-		$(function () {
-		    var chart;
-		    $(document).ready(function() {
-		        chart = new Highcharts.Chart({
-		            chart: {
-		                renderTo: 'time-container',
-		                type: 'line',
-		                marginRight: 130,
-		                marginBottom: 35
-		            },
-		            title: {​
-		                text: 'fNN vs. LinearSearch',
-		                x: -20 //center
-		            },
-		            xAxis: {
-		                title: {
-		                    text: '# of Tiles'
-		                },
-		                categories: ['100', '200', '300', '400', '500', '600',
-		                    '700', '800', '900', '1000']
-		            },
-		            yAxis: {
-		                title: {
-		                    text: 'Time (ms)'
-		                },
-		                plotLines: [{
-		                    value: 0,
-		                    width: 1,
-		                    color: '#808080'
-		                }]
-		            },
-		            tooltip: {
-		                formatter: function() {
-		                        return '<b>'+ this.series.name +'</b><br/>'+
-		                        this.x +' tiles: '+ this.y +' ms';
-		                }
-		            },
-		            legend: {
-		                layout: 'vertical',
-		                align: 'right',
-		                verticalAlign: 'top',
-		                x: -10,
-		                y: 100,
-		                borderWidth: 0
-		            },
-		            series: [{
-		                name: 'LinearSearch',
-		                data: [9310,20316,28448,37338,46625,56641,67288,75460,86985,94084]
-		            }, {
-		                name: 'fNN',
-		                data: [3498, 3961,4175,4897,5152,5407,5898,6183,6264,6382]
-		            }]
-		        });
-		    });
+		$(function() {
+			var chart;
+			$(document).ready(function() {
+				chart = new Highcharts.Chart({
+					chart: {
+						renderTo: 'time-container',
+						type: 'line',
+						marginRight: 130,
+						marginBottom: 35
+					},
+					title: {
+						text: 'fNN vs. LinearSearch',
+						x: -20
+					},
+					xAxis: {
+						title: {
+							text: '# of Tiles'
+						},
+						categories: ['100', '200', '300', '400', '500', '600',
+							'700', '800', '900', '1000']
+					},
+					yAxis: {
+						title: {
+							text: 'Time (ms)'
+						},
+						plotLines: [{
+							value: 0,
+							width: 1,
+							color: '#808080'
+						}]
+					},
+					tooltip: {
+						formatter: function() {
+							return '<b>' + this.series.name + '</b><br/>' +
+							this.x + ' tiles: ' + this.y + ' ms';
+						}
+					},
+					legend: {
+						layour: 'vertical',
+						align: 'right',
+						verticalAlign: 'top',
+						x: -10,
+						y: 100,
+						borderWidth: 0
+					},
+					series: [{
+						name: 'LinearSearch',
+						data: [9310,20316,28448,37338,46625,56641,67288,75460,86985,94084]
+					}, {
+						name: 'fNN',
+						data: [3498, 3961,4175,4897,5152,5407,5898,6183,6264,6382]
+					}]
+				})
+			});
 		});
 	</script>
 </html>
